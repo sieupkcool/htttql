@@ -1,5 +1,5 @@
 from app.models import dethi, cauhoi, nguoidung, monhoc, db
-from sqlalchemy import func
+from sqlalchemy import func, extract
 
 class StatisticsService:
     @staticmethod
@@ -32,10 +32,6 @@ class StatisticsService:
             "exams_taken": exams_taken
         }
     
-    from app.models import cauhoi, monhoc
-from sqlalchemy import func
-
-class StatisticsService:
     @staticmethod
     def get_completion_statistics():
         from app.models import chitietcongviec, giangvien
@@ -58,3 +54,50 @@ class StatisticsService:
                 "completion_rate": round(completed/total*100, 2) if total else 0
             })
         return stats
+    
+    @staticmethod
+    def get_exam_count(kyhoc, monhoc_id):
+        query = dethi.query
+        title = "Số lượng đề thi"
+        # Lọc theo năm tạo nếu có chọn kỳ học
+        if kyhoc:
+            years = [int(y) for y in kyhoc.split('-')]
+            query = query.filter(extract('year', dethi.ngaytao).in_(years))
+            title += f" theo năm tạo ({', '.join(str(y) for y in years)})"
+        if monhoc_id:
+            query = query.filter(dethi.monhocid == monhoc_id)
+            title += f", môn học ({monhoc_id})"
+
+        # Nếu chỉ chọn kỳ học, thống kê theo môn
+        if kyhoc and not monhoc_id:
+            result = (
+                query.join(monhoc, dethi.monhocid == monhoc.monhocid)
+                .with_entities(monhoc.ten, func.count(dethi.dethiid))
+                .group_by(monhoc.ten)
+                .all()
+            )
+            labels = [r[0] for r in result]
+            values = [r[1] for r in result]
+        # Nếu chọn môn học, trả về tên môn và tổng số đề thi
+        elif monhoc_id:
+            mon = monhoc.query.get(monhoc_id)
+            mon_name = mon.ten if mon else "Môn học"
+            count = query.count()
+            labels = [mon_name]
+            values = [count]
+        # Nếu không chọn gì, thống kê theo tất cả môn
+        else:
+            result = (
+                query.join(monhoc, dethi.monhocid == monhoc.monhocid)
+                .with_entities(monhoc.ten, func.count(dethi.dethiid))
+                .group_by(monhoc.ten)
+                .all()
+            )
+            labels = [r[0] for r in result]
+            values = [r[1] for r in result]
+
+        return {
+            "labels": labels,
+            "values": values,
+            "title": title
+        }

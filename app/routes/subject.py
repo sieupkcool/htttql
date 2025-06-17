@@ -22,10 +22,13 @@ def delete_subject(subject_id):
     subject_service.delete_subject(subject_id)
     return jsonify({'message': 'Subject deleted successfully'}), 204
 
-@subject_bp.route('/subjects', methods=['GET'])
+@subject_bp.route('/subjects')
 def get_subjects():
-    subjects = subject_service.get_all_subjects()
-    return jsonify(subjects), 200
+    subjects = monhoc.query.all()
+    return jsonify([
+        {"monhocid": s.monhocid, "ten": s.ten}
+        for s in subjects
+    ])
 
 @subject_bp.route('/subjects/<int:subject_id>', methods=['GET'])
 def get_subject(subject_id):

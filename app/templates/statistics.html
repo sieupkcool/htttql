@@ -1,27 +1,92 @@
-{% extends "base.html" %} {% block title %}Thống kê câu hỏi{% endblock %} {%
-block head %}
+{% extends "base.html" %} {% block title %}Thống kê số lượng đề thi{% endblock
+%} {% block head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %} {% block content %}
-<h2>Thống kê câu hỏi theo môn</h2>
-<canvas id="chart" width="600" height="400"></canvas>
+<h2>THỐNG KÊ SỐ LƯỢNG ĐỀ THI</h2>
+<div class="row mb-3">
+  <div class="col-md-3">
+    <label>Kỳ học</label>
+    <select id="kyhoc" class="form-select">
+      <option value="">Chọn kỳ học</option>
+      <option value="2024-2025">2024-2025</option>
+      <option value="2025-2026">2025-2026</option>
+      <!-- Thêm các kỳ học khác nếu cần -->
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label>Môn học</label>
+    <select id="monhoc" class="form-select">
+      <option value="">Chọn môn học</option>
+      <!-- JS sẽ load danh sách môn học -->
+    </select>
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button id="btnThongKe" class="btn btn-primary">Xem Thống Kê</button>
+  </div>
+</div>
+<div style="width: 100%; max-width: 400px; margin: auto">
+  <canvas id="chart"></canvas>
+</div>
 {% endblock %} {% block scripts %}
 <script>
-  fetch("/statistics/question")
+  // Load danh sách môn học
+  fetch("/subjects")
     .then((res) => res.json())
     .then((data) => {
-      const labels = Object.keys(data);
-      const easy = labels.map((l) => data[l].Dễ || 0);
-      const hard = labels.map((l) => data[l].Khó || 0);
-      new Chart(document.getElementById("chart"), {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [
-            { label: "Dễ", data: easy, backgroundColor: "green" },
-            { label: "Khó", data: hard, backgroundColor: "red" },
-          ],
-        },
+      const select = document.getElementById("monhoc");
+      data.forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m.monhocid;
+        opt.textContent = m.ten;
+        select.appendChild(opt);
       });
     });
+
+  document.getElementById("btnThongKe").onclick = function () {
+    const kyhoc = document.getElementById("kyhoc").value;
+    const monhoc = document.getElementById("monhoc").value;
+    fetch(`/statistics/exam?kyhoc=${kyhoc}&monhoc=${monhoc}`)
+      .then((res) => res.json())
+      .then((data) => {
+        // data = { labels: [...], values: [...] }
+        const ctx = document.getElementById("chart").getContext("2d");
+        if (window.examChart) window.examChart.destroy();
+        window.examChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: "Số lượng đề thi",
+                data: data.values,
+                backgroundColor: "blue",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: data.title,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                  precision: 0,
+                  callback: function (value) {
+                    if (Number.isInteger(value)) return value;
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+  };
 </script>
 {% endblock %}
