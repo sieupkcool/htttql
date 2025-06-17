@@ -33,27 +33,34 @@ class StatisticsService:
         }
     
     @staticmethod
-    def get_completion_statistics():
-        from app.models import chitietcongviec, giangvien
-        from sqlalchemy import func
-        results = (
-            db.session.query(
-                chitietcongviec.giangvienid,
-                func.count(chitietcongviec.phancongid).label('total'),
-                func.sum(func.case([(chitietcongviec.trangthai == 'Đã hoàn thành', 1)], else_=0)).label('completed')
-            )
-            .group_by(chitietcongviec.giangvienid)
-            .all()
-        )
-        stats = []
-        for gv_id, total, completed in results:
-            stats.append({
-                "giangvienid": gv_id,
-                "total": total,
-                "completed": completed,
-                "completion_rate": round(completed/total*100, 2) if total else 0
-            })
-        return stats
+    def get_completion_statistics(kyhoc=None, giangvien=None):
+        from app.models import chitietcongviec, congviec, db
+        query = chitietcongviec.query
+
+        if kyhoc:
+            years = [int(y) for y in kyhoc.split('-')]
+            query = query.filter(extract('year', chitietcongviec.ngayphancong).in_(years))
+        if giangvien:
+            query = query.filter(chitietcongviec.giangvienid == giangvien)
+
+        total = query.count()
+        completed = query.filter(chitietcongviec.trangthai == "Đã hoàn thành").count()
+
+        # Lấy tên giảng viên nếu có
+        title = "Tỷ lệ hoàn thành công việc"
+        if kyhoc:
+            title += f" ({kyhoc})"
+        if giangvien:
+            from app.models import nguoidung
+            gv = nguoidung.query.get(giangvien)
+            if gv:
+                title += f", Giảng viên: {gv.hovaten}"
+
+        return {
+            "total": total,
+            "completed": completed,
+            "title": title
+        }
     
     @staticmethod
     def get_exam_count(kyhoc, monhoc_id):

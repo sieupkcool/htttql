@@ -11,7 +11,7 @@
   </div>
   <a href="/index">🏠 Trang chủ</a>
   <a href="/profile">👤 Thông tin cá nhân</a>
-  <a href="/statistics" class="role-all">📊 Thống kê</a>
+  <a href="#" id="sidebar-statistics-link" class="role-all">📊 Thống kê</a>
   <a href="/bomon" class="role-truongkhoa">📚 Bộ môn</a>
   <a href="/assignment" class="role-truongbomon">🤝 Phân công</a>
   <a href="/progress" class="role-truongbomon">✅ Duyệt công việc</a>
@@ -52,4 +52,15 @@
   if (hovaten) document.getElementById("sidebar-username").innerText = hovaten;
   // Hiển thị vai trò
   if (role) document.getElementById("sidebar-role").innerText = role;
+  // Điều hướng "Thống kê" theo vai trò
+  document.getElementById("sidebar-statistics-link").onclick = function (e) {
+    e.preventDefault();
+    if (role === "Trưởng bộ môn") {
+      window.location.href = "/completion_stats";
+    } else if (role === "Trưởng khoa") {
+      window.location.href = "/statistics";
+    } else {
+      window.location.href = "/statistics";
+    }
+  };
 </script>

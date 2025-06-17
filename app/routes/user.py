@@ -1,7 +1,20 @@
 from flask import Blueprint, request, jsonify
+from app.models import nguoidung
 from app.services.user_service import UserService
 
 user_bp = Blueprint('user', __name__)
+
+@user_bp.route('/user')
+def get_users():
+    role = request.args.get('role')
+    query = nguoidung.query
+    if role:
+        query = query.filter(nguoidung.vitri == role)
+    users = query.all()
+    return jsonify([
+        {"userid": u.userid, "hovaten": u.hovaten, "vitri": u.vitri}
+        for u in users
+    ])
 
 @user_bp.route('/user/<int:user_id>', methods=['GET'])
 def get_user(user_id):

@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.assignment_service import AssignmentService
+from app.models import congviec
 
 assignment_bp = Blueprint('assignment', __name__)
 assignment_service = AssignmentService()
@@ -44,3 +45,11 @@ def get_assignments():
     # Lấy danh sách phân công cho giảng viên này
     assignments = AssignmentService.get_assignments_for_giangvien(giangvienid)
     return jsonify(assignments)
+
+@assignment_bp.route('/jobs')
+def get_jobs():
+    jobs = congviec.query.all()
+    return jsonify([
+        {"congviecid": j.congviecid, "noidung": j.noidung}
+        for j in jobs
+    ])

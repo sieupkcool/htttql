@@ -2,28 +2,81 @@
 %} {% block head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %} {% block content %}
-<h2>Thống kê tỷ lệ hoàn thành công việc</h2>
-<canvas id="completionChart" width="600" height="400"></canvas>
+<h2>THỐNG KÊ TỶ LỆ HOÀN THÀNH CÔNG VIỆC</h2>
+<div class="row mb-3">
+  <div class="col-md-3">
+    <label>Kỳ học</label>
+    <select id="kyhoc" class="form-select">
+      <option value="">Chọn kỳ học</option>
+      <option value="2024-2025">2024-2025</option>
+      <option value="2025-2026">2025-2026</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label>Giảng viên</label>
+    <select id="giangvien" class="form-select">
+      <option value="">Chọn giảng viên</option>
+      <!-- JS sẽ load danh sách giảng viên -->
+    </select>
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button id="btnThongKe" class="btn btn-primary">Xem Thống Kê</button>
+  </div>
+</div>
+<div style="width: 100%; max-width: 400px; margin: auto">
+  <canvas id="completionChart"></canvas>
+</div>
 {% endblock %} {% block scripts %}
 <script>
-  fetch("/statistics/completion")
+  // Load danh sách giảng viên
+  fetch("/user?role=Giảng viên")
     .then((res) => res.json())
     .then((data) => {
-      const labels = data.map((d) => "GV " + d.giangvienid);
-      const rates = data.map((d) => d.completion_rate);
-      new Chart(document.getElementById("completionChart"), {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Tỷ lệ hoàn thành (%)",
-              data: rates,
-              backgroundColor: "blue",
-            },
-          ],
-        },
+      const select = document.getElementById("giangvien");
+      data.forEach((gv) => {
+        const opt = document.createElement("option");
+        opt.value = gv.userid;
+        opt.textContent = gv.hovaten;
+        select.appendChild(opt);
       });
     });
+
+  document.getElementById("btnThongKe").onclick = function () {
+    const kyhoc = document.getElementById("kyhoc").value;
+    const giangvien = document.getElementById("giangvien").value;
+    fetch(`/statistics/completion?kyhoc=${kyhoc}&giangvien=${giangvien}`)
+      .then((res) => res.json())
+      .then((data) => {
+        // ... kiểm tra dữ liệu như cũ ...
+        const ctx = document.getElementById("completionChart").getContext("2d");
+        // Chỉ destroy nếu completionChart là Chart hợp lệ và có hàm destroy
+        if (
+          window.completionChart &&
+          typeof window.completionChart.destroy === "function"
+        ) {
+          window.completionChart.destroy();
+        }
+        window.completionChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Hoàn thành", "Chưa hoàn thành"],
+            datasets: [
+              {
+                data: [data.completed, data.total - data.completed],
+                backgroundColor: ["#1976d2", "#bdbdbd"],
+              },
+            ],
+          },
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: data.title,
+              },
+            },
+          },
+        });
+      });
+  };
 </script>
 {% endblock %}
