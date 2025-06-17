@@ -1,28 +1,171 @@
 {% extends "base.html" %} {% block title %}Thêm câu hỏi{% endblock %} {% block
 content %}
-<h2>Thêm câu hỏi mới</h2>
-<form id="addQuestionForm">
-  <input id="mota" placeholder="Nội dung câu hỏi" required /><br />
-  <input id="mucdo" placeholder="Mức độ (Dễ/Khó)" required /><br />
-  <input id="chuong" placeholder="Chương" /><br />
-  <input id="nguoitaoid" placeholder="ID người tạo" required /><br />
-  <input id="dethiid" placeholder="ID đề thi" required /><br />
-  <button type="submit">Thêm câu hỏi</button>
-</form>
-<div id="questionMsg"></div>
+<div class="card mx-auto" style="max-width: 500px; margin-top: 40px">
+  <div class="card-body">
+    <h4 class="card-title mb-4">Chi tiết</h4>
+    <form id="addQuestionForm">
+      <div class="mb-3">
+        <label for="mota" class="form-label">Nội dung</label>
+        <input id="mota" class="form-control" placeholder="Nội dung" required />
+      </div>
+      <div class="mb-3">
+        <label for="mucdo" class="form-label">Mức độ</label>
+        <select id="mucdo" class="form-select" required>
+          <option value="">Chọn mức độ</option>
+          <option value="Dễ">Dễ</option>
+          <option value="Trung bình">Trung bình</option>
+          <option value="Khó">Khó</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="chuong" class="form-label">Chương</label>
+        <input
+          id="chuong"
+          class="form-control"
+          type="number"
+          min="1"
+          placeholder="Nhập số chương"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Chọn loại câu hỏi</label>
+        <div>
+          <input
+            type="radio"
+            name="loaicauhoi"
+            id="tracnghiem"
+            value="tracnghiem"
+            checked
+          />
+          <label for="tracnghiem">Trắc nghiệm</label>
+        </div>
+        <div class="mt-2">
+          <input type="radio" name="loaicauhoi" id="tuluan" value="tuluan" />
+          <label for="tuluan">Tự luận</label>
+        </div>
+      </div>
+      <div id="dapAnInputs" class="mb-3"></div>
+      <div class="d-flex justify-content-end gap-2">
+        <button type="reset" class="btn btn-secondary">Làm lại</button>
+        <button type="submit" class="btn btn-primary">Đồng ý</button>
+      </div>
+      <div id="questionMsg" class="mt-2 text-danger"></div>
+    </form>
+  </div>
+</div>
 {% endblock %} {% block scripts %}
 <script>
+  function renderDapAnInputs() {
+    const isTracNghiem = document.getElementById("tracnghiem").checked;
+    const dapAnDiv = document.getElementById("dapAnInputs");
+    dapAnDiv.innerHTML = "";
+    if (isTracNghiem) {
+      const labels = ["A", "B", "C", "D"];
+      for (let i = 0; i < 4; i++) {
+        dapAnDiv.innerHTML += `
+          <div class="input-group mb-2">
+            <span class="input-group-text">Đáp án ${labels[i]}</span>
+            <input type="text" class="form-control" id="dapan${
+              labels[i]
+            }" placeholder="Nhập đáp án ${labels[i]}" required>
+            <div class="input-group-text">
+              <input type="radio" name="dapanDung" value="${labels[i]}" ${
+          i === 0 ? "checked" : ""
+        }>
+              <span class="ms-1">Đúng</span>
+            </div>
+          </div>
+        `;
+      }
+    } else {
+      dapAnDiv.innerHTML = `
+        <label for="tuluanContent" class="form-label">Nội dung đáp án</label>
+        <textarea id="tuluanContent" class="form-control" placeholder="Nhập đáp án tự luận" required></textarea>
+      `;
+    }
+  }
+  document.getElementById("tracnghiem").onchange = renderDapAnInputs;
+  document.getElementById("tuluan").onchange = renderDapAnInputs;
+  renderDapAnInputs();
+
   document.getElementById("addQuestionForm").onsubmit = function (e) {
     e.preventDefault();
+    const mota = document.getElementById("mota").value.trim();
+    const mucdo = document.getElementById("mucdo").value;
+    const chuong = document.getElementById("chuong").value;
+    const loaicauhoi = document.querySelector(
+      'input[name="loaicauhoi"]:checked'
+    ).value;
+    let dapan = null;
+
+    if (!mota) {
+      document.getElementById("questionMsg").innerText =
+        "Vui lòng nhập nội dung câu hỏi";
+      return;
+    }
+    if (!mucdo) {
+      document.getElementById("questionMsg").innerText = "Vui lòng chọn mức độ";
+      return;
+    }
+    if (!chuong) {
+      document.getElementById("questionMsg").innerText = "Vui lòng nhập chương";
+      return;
+    }
+
+    if (loaicauhoi === "tracnghiem") {
+      const labels = ["A", "B", "C", "D"];
+      const choices = [];
+      for (let i = 0; i < 4; i++) {
+        const val = document.getElementById(`dapan${labels[i]}`).value.trim();
+        if (!val) {
+          document.getElementById(
+            "questionMsg"
+          ).innerText = `Vui lòng nhập đáp án ${labels[i]}`;
+          return;
+        }
+        choices.push(val);
+      }
+      const correct = document.querySelector('input[name="dapanDung"]:checked');
+      if (!correct) {
+        document.getElementById("questionMsg").innerText =
+          "Vui lòng chọn đáp án đúng";
+        return;
+      }
+      dapan = JSON.stringify({
+        option: correct.value,
+        choices: choices,
+      });
+    } else {
+      const content = document.getElementById("tuluanContent").value.trim();
+      if (!content) {
+        document.getElementById("questionMsg").innerText =
+          "Vui lòng nhập đáp án tự luận";
+        return;
+      }
+      dapan = JSON.stringify({
+        content: content,
+      });
+    }
+
+    // Lấy user_id từ localStorage, ngày tạo hiện tại
+    const nguoitaoid = localStorage.getItem("user_id");
+    const ngaytao = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+
     fetch("/questions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        nguoitaoid: nguoitaoid, // Gửi user_id qua header
+      },
       body: JSON.stringify({
-        mota: document.getElementById("mota").value,
-        mucdo: document.getElementById("mucdo").value,
-        chuong: document.getElementById("chuong").value,
-        nguoitaoid: document.getElementById("nguoitaoid").value,
-        dethiid: document.getElementById("dethiid").value,
+        mota,
+        mucdo,
+        chuong,
+        loaicauhoi,
+        dapan,
+        ngaytao,
+        noidung: mota,
       }),
     })
       .then((res) => res.json())

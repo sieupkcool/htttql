@@ -4,11 +4,33 @@ from app.models import cauhoi, db
 class QuestionService:
     @staticmethod
     def add_question(data):
+        import json
+        if data.get('loaicauhoi') == 'tracnghiem':
+            try:
+                dapan_obj = json.loads(data.get('dapan'))
+                assert 'option' in dapan_obj and 'choices' in dapan_obj
+                assert len(dapan_obj['choices']) == 4
+            except Exception:
+                return jsonify({"message": "Đáp án trắc nghiệm không hợp lệ"}), 400
+        elif data.get('loaicauhoi') == 'tuluan':
+            try:
+                dapan_obj = json.loads(data.get('dapan'))
+                assert 'content' in dapan_obj
+            except Exception:
+                return jsonify({"message": "Đáp án tự luận không hợp lệ"}), 400
+
+        # Đảm bảo luôn có trường noidung
+        noidung = data.get('noidung') or data.get('mota')
+
         new_question = cauhoi(
             mota=data.get('mota'),
             mucdo=data.get('mucdo'),
             chuong=data.get('chuong'),
+            loaicauhoi=data.get('loaicauhoi'),
+            dapan=data.get('dapan'),
             nguoitaoid=data.get('nguoitaoid'),
+            ngaytao=data.get('ngaytao'),
+            noidung=noidung,  # Thêm dòng này
             dethiid=data.get('dethiid')
         )
         db.session.add(new_question)

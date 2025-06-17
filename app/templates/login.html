@@ -36,6 +36,7 @@ content %}
         if (data.user_id) {
           localStorage.setItem("user_id", data.user_id);
           localStorage.setItem("role", data.role);
+          localStorage.setItem("hovaten", data.hovaten); // Sửa lại dòng này
           window.location.href = "/";
         } else {
           document.getElementById("loginError").innerText =

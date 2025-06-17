@@ -6,9 +6,10 @@ question_service = QuestionService()
 
 @question_bp.route('/questions', methods=['POST'])
 def add_question():
-    data = request.json
-    question = question_service.add_question(data)
-    return jsonify(question), 201
+    data = request.get_json()
+    nguoitaoid = request.headers.get('nguoitaoid')  # Lấy từ header
+    data['nguoitaoid'] = nguoitaoid
+    return question_service.add_question(data)
 
 @question_bp.route('/questions/<int:question_id>', methods=['PUT'])
 def update_question(question_id):

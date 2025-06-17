@@ -33,7 +33,12 @@ def login():
     if user:
         session['user_id'] = user.userid
         session['role'] = user.vitri
-        return jsonify({'user_id': user.userid, 'role': user.vitri}), 200
+        session['hovaten'] = user.hovaten
+        return jsonify({
+            'user_id': user.userid,
+            'role': user.vitri,
+            'hovaten': user.hovaten
+        }), 200
     return jsonify({'message': 'Invalid credentials'}), 401
 
 @auth_bp.route('/logout', methods=['POST'])

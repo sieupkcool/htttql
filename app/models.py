@@ -119,3 +119,7 @@ class cauhoi(db.Model):
     nguoitaoid = db.Column(db.Integer, db.ForeignKey('giangvien.giangvienid'))
     ngaytao = db.Column(db.Date)
     dethiid = db.Column(db.Integer, db.ForeignKey('dethi.dethiid'))
+    # Thêm các trường mới:
+    noidung = db.Column(db.Text)
+    loaicauhoi = db.Column(db.String(50))
+    dapan = db.Column(db.Text)
