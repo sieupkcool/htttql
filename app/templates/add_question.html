@@ -1,0 +1,35 @@
+{% extends "base.html" %} {% block title %}Thêm câu hỏi{% endblock %} {% block
+content %}
+<h2>Thêm câu hỏi mới</h2>
+<form id="addQuestionForm">
+  <input id="mota" placeholder="Nội dung câu hỏi" required /><br />
+  <input id="mucdo" placeholder="Mức độ (Dễ/Khó)" required /><br />
+  <input id="chuong" placeholder="Chương" /><br />
+  <input id="nguoitaoid" placeholder="ID người tạo" required /><br />
+  <input id="dethiid" placeholder="ID đề thi" required /><br />
+  <button type="submit">Thêm câu hỏi</button>
+</form>
+<div id="questionMsg"></div>
+{% endblock %} {% block scripts %}
+<script>
+  document.getElementById("addQuestionForm").onsubmit = function (e) {
+    e.preventDefault();
+    fetch("/questions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mota: document.getElementById("mota").value,
+        mucdo: document.getElementById("mucdo").value,
+        chuong: document.getElementById("chuong").value,
+        nguoitaoid: document.getElementById("nguoitaoid").value,
+        dethiid: document.getElementById("dethiid").value,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById("questionMsg").innerText =
+          data.message || "Thêm câu hỏi thành công!";
+      });
+  };
+</script>
+{% endblock %}

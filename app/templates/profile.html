@@ -1,0 +1,67 @@
+{% extends "base.html" %} {% block title %}Thông tin cá nhân{% endblock %} {%
+block content %}
+<h2>Thông tin cá nhân</h2>
+<form id="profileForm">
+  <input type="text" id="hovaten" placeholder="Họ tên" /><br />
+  <input type="text" id="gioitinh" placeholder="Giới tính" /><br />
+  <input type="text" id="diachi" placeholder="Địa chỉ" /><br />
+  <input type="text" id="sodienthoai" placeholder="Số điện thoại" /><br />
+  <input type="email" id="email" placeholder="Email" /><br />
+  <button type="submit">Cập nhật</button>
+</form>
+<button onclick="showChangePassword()">Đổi mật khẩu</button>
+<div id="profileMsg"></div>
+<div id="changePassword" style="display: none">
+  <input type="password" id="newPassword" placeholder="Mật khẩu mới" />
+  <button onclick="changePassword()">Lưu mật khẩu</button>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  const userId = localStorage.getItem("user_id");
+  fetch(`/user/${userId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      document.getElementById("hovaten").value = data.hovaten || "";
+      document.getElementById("gioitinh").value = data.gioitinh || "";
+      document.getElementById("diachi").value = data.diachi || "";
+      document.getElementById("sodienthoai").value = data.sodienthoai || "";
+      document.getElementById("email").value = data.email || "";
+    });
+
+  document.getElementById("profileForm").onsubmit = function (e) {
+    e.preventDefault();
+    fetch(`/user/${userId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        hovaten: document.getElementById("hovaten").value,
+        gioitinh: document.getElementById("gioitinh").value,
+        diachi: document.getElementById("diachi").value,
+        sodienthoai: document.getElementById("sodienthoai").value,
+        email: document.getElementById("email").value,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById("profileMsg").innerText = data.message;
+      });
+  };
+
+  function showChangePassword() {
+    document.getElementById("changePassword").style.display = "block";
+  }
+  function changePassword() {
+    fetch(`/user/${userId}/change-password`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        new_password: document.getElementById("newPassword").value,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById("profileMsg").innerText = data.message;
+      });
+  }
+</script>
+{% endblock %}

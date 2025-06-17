@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block title %}Quản lý câu hỏi{% endblock %} {%
+block content %}
+<h2>Danh sách câu hỏi</h2>
+<table id="questionTable" border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Mô tả</th>
+      <th>Mức độ</th>
+      <th>Chương</th>
+      <th>Đề thi</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+{% endblock %} {% block scripts %}
+<script>
+  function loadQuestions() {
+    fetch("/questions")
+      .then((res) => res.json())
+      .then((questions) => {
+        const tbody = document
+          .getElementById("questionTable")
+          .querySelector("tbody");
+        tbody.innerHTML = "";
+        questions.forEach((q) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${q.cauhoiid}</td><td>${q.mota}</td><td>${q.mucdo}</td>
+          <td>${q.chuong}</td><td>${q.dethiid}</td>
+          <td>
+            <button onclick="deleteQuestion(${q.cauhoiid})">Xóa</button>
+          </td>`;
+          tbody.appendChild(tr);
+        });
+      });
+  }
+  function deleteQuestion(id) {
+    fetch(`/questions/${id}`, {
+      method: "DELETE",
+    }).then(() => loadQuestions());
+  }
+  loadQuestions();
+</script>
+{% endblock %}

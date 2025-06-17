@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% block title %}Quản lý giảng viên{% endblock %} {%
+block content %}
+<h2>Danh sách giảng viên</h2>
+<table id="userTable" border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Họ tên</th>
+      <th>Vai trò</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<button onclick="showAdd()">Thêm mới</button>
+<div id="addForm" style="display: none">
+  <input id="addName" placeholder="Họ tên" />
+  <input id="addRole" placeholder="Vai trò" />
+  <button onclick="addUser()">Lưu</button>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  function loadUsers() {
+    fetch("/user")
+      .then((res) => res.json())
+      .then((users) => {
+        const tbody = document
+          .getElementById("userTable")
+          .querySelector("tbody");
+        tbody.innerHTML = "";
+        users.forEach((u) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${u.userid}</td><td>${u.hovaten}</td><td>${u.vitri}</td>
+          <td><button onclick="deleteUser(${u.userid})">Xóa</button></td>`;
+          tbody.appendChild(tr);
+        });
+      });
+  }
+  function showAdd() {
+    document.getElementById("addForm").style.display = "block";
+  }
+  function addUser() {
+    fetch("/user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        hovaten: document.getElementById("addName").value,
+        vitri: document.getElementById("addRole").value,
+      }),
+    }).then(() => {
+      loadUsers();
+      document.getElementById("addForm").style.display = "none";
+    });
+  }
+  function deleteUser(id) {
+    fetch(`/user/${id}`, { method: "DELETE" }).then(() => loadUsers());
+  }
+  loadUsers();
+</script>
+{% endblock %}

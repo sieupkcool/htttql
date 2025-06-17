@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block title %}Tiến độ công việc{% endblock %} {%
+block content %}
+<h2>Tiến độ công việc giảng viên</h2>
+<table id="progressTable" border="1">
+  <thead>
+    <tr>
+      <th>Giảng viên</th>
+      <th>Công việc</th>
+      <th>Trạng thái</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+{% endblock %} {% block scripts %}
+<script>
+  fetch("/assignments")
+    .then((res) => res.json())
+    .then((data) => {
+      const tbody = document
+        .getElementById("progressTable")
+        .querySelector("tbody");
+      tbody.innerHTML = "";
+      data.forEach((a) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${a.giangvienid}</td><td>${a.congviecid}</td><td>${a.trangthai}</td>
+        <td><button onclick="approve(${a.phancongid})">Duyệt</button></td>`;
+        tbody.appendChild(tr);
+      });
+    });
+  function approve(id) {
+    fetch(`/assignments/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ trangthai: "Đã hoàn thành" }),
+    }).then(() => location.reload());
+  }
+</script>
+{% endblock %}

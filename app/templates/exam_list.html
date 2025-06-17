@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block title %}Quản lý đề thi{% endblock %} {% block
+content %}
+<h2>Danh sách đề thi</h2>
+<table id="examTable" border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Mã đề</th>
+      <th>Ghi chú</th>
+      <th>Môn học</th>
+      <th>Ngày tạo</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+{% endblock %} {% block scripts %}
+<script>
+  function loadExams() {
+    fetch("/exams")
+      .then((res) => res.json())
+      .then((exams) => {
+        const tbody = document
+          .getElementById("examTable")
+          .querySelector("tbody");
+        tbody.innerHTML = "";
+        exams.forEach((e) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${e.dethiid}</td><td>${e.madethi}</td><td>${
+            e.ghichu || ""
+          }</td>
+          <td>${e.monhocid}</td><td>${e.ngaytao || ""}</td>
+          <td>
+            <button onclick="deleteExam(${e.dethiid})">Xóa</button>
+          </td>`;
+          tbody.appendChild(tr);
+        });
+      });
+  }
+  function deleteExam(id) {
+    fetch(`/exams/${id}`, { method: "DELETE" }).then(() => loadExams());
+  }
+  loadExams();
+</script>
+{% endblock %}

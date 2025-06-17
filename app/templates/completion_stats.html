@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block title %}Thống kê tỷ lệ hoàn thành{% endblock
+%} {% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %} {% block content %}
+<h2>Thống kê tỷ lệ hoàn thành công việc</h2>
+<canvas id="completionChart" width="600" height="400"></canvas>
+{% endblock %} {% block scripts %}
+<script>
+  fetch("/statistics/completion")
+    .then((res) => res.json())
+    .then((data) => {
+      const labels = data.map((d) => "GV " + d.giangvienid);
+      const rates = data.map((d) => d.completion_rate);
+      new Chart(document.getElementById("completionChart"), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Tỷ lệ hoàn thành (%)",
+              data: rates,
+              backgroundColor: "blue",
+            },
+          ],
+        },
+      });
+    });
+</script>
+{% endblock %}

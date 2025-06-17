@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% block title %}Bộ môn{% endblock %} {% block content
+%}
+<h1>Quản lý đề thi - Bộ Môn</h1>
+<div class="bo-mon-section">
+  <h2>Chọn bộ môn cần xem đề thi:</h2>
+  <select id="select-bo-mon" onchange="loadDeThi()">
+    <option value="">-- Chọn bộ môn --</option>
+  </select>
+  <div
+    id="de-thi-container"
+    class="de-thi-container"
+    style="display: none"
+  ></div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/departments")
+      .then((res) => res.json())
+      .then((data) => {
+        const select = document.getElementById("select-bo-mon");
+        data.forEach((bm) => {
+          const opt = document.createElement("option");
+          opt.value = bm.khoaid;
+          opt.textContent = bm.ten;
+          select.appendChild(opt);
+        });
+      });
+  });
+
+  function loadDeThi() {
+    const selected = document.getElementById("select-bo-mon").value;
+    const container = document.getElementById("de-thi-container");
+
+    if (selected !== "") {
+      fetch(`/exams?department_id=${selected}`)
+        .then((res) => res.json())
+        .then((data) => {
+          container.innerHTML = "<h3>Danh sách đề thi:</h3>";
+          data.forEach((de) => {
+            const card = document.createElement("div");
+            card.className = "de-thi-card";
+            card.innerHTML = `<p>📝 ${de.madethi}: ${de.ghichu || ""}</p>
+              <button onclick="xemChiTiet('${
+                de.madethi
+              }', '${selected}')">Xem chi tiết</button>`;
+            container.appendChild(card);
+          });
+          container.style.display = "block";
+        });
+    } else {
+      container.style.display = "none";
+    }
+  }
+
+  function xemChiTiet(tenDe, khoaid) {
+    window.location.href = `/chitietde?de=${encodeURIComponent(
+      tenDe
+    )}&mon=${encodeURIComponent(khoaid)}`;
+  }
+</script>
+{% endblock %}

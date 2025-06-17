@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block title %}Chi tiết đề thi{% endblock %} {%
+block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>📄 Chi tiết đề thi</h2>
+  <a href="/bomon" class="btn btn-secondary">⬅️ Quay lại</a>
+</div>
+<div id="thongTinDeThi" class="info-box mb-4 shadow-sm"></div>
+<div id="danhSachCauHoi" class="mb-4">
+  <h4 class="mb-3">📚 Danh sách câu hỏi</h4>
+  <ul class="list-group shadow-sm">
+    <li class="list-group-item">Đang tải câu hỏi...</li>
+  </ul>
+</div>
+<div class="d-flex gap-3">
+  <button class="btn btn-warning px-4" onclick="suaDeThi()">
+    🖊️ Sửa đề thi
+  </button>
+  <button class="btn btn-danger px-4" onclick="xoaDeThi()">
+    🗑️ Xóa đề thi
+  </button>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const deThi = urlParams.get("de");
+  const boMon = urlParams.get("mon");
+
+  const thongTin = document.getElementById("thongTinDeThi");
+  const danhSach = document
+    .getElementById("danhSachCauHoi")
+    .querySelector("ul");
+
+  if (deThi && boMon) {
+    thongTin.innerHTML = `
+      <h4 class="mb-3">📝 ${deThi}</h4>
+      <p><strong>Bộ môn:</strong> ${decodeURIComponent(boMon)}</p>
+      <p><strong>Mô tả:</strong> Đây là đề thi thuộc học phần <em>${decodeURIComponent(
+        boMon
+      )}</em>. Đề kiểm tra kiến thức chuyên sâu liên quan đến <strong>${deThi}</strong>.</p>
+      <p><strong>Thời gian làm bài:</strong> 60 phút</p>
+      <p><strong>Trạng thái:</strong> ✅ Đã phê duyệt</p>
+    `;
+
+    // TODO: fetch danh sách câu hỏi thực tế từ BE
+    danhSach.innerHTML =
+      "<li class='list-group-item'>Chưa có dữ liệu câu hỏi.</li>";
+  } else {
+    thongTin.innerHTML =
+      "<p class='text-danger'>Không tìm thấy thông tin đề thi.</p>";
+  }
+
+  function suaDeThi() {
+    alert("Chức năng sửa đề thi đang được phát triển.");
+  }
+
+  function xoaDeThi() {
+    const confirmDelete = confirm("Bạn có chắc chắn muốn xóa đề thi này?");
+    if (confirmDelete) {
+      alert("Đã xóa đề thi (mô phỏng).");
+      window.location.href = "/bomon";
+    }
+  }
+</script>
+{% endblock %}

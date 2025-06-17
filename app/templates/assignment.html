@@ -1,0 +1,35 @@
+{% extends "base.html" %} {% block title %}Phân công công việc{% endblock %} {%
+block content %}
+<h2>Phân công công việc cho giảng viên</h2>
+<form id="assignForm">
+  <input id="giangvienid" placeholder="ID giảng viên" /><br />
+  <input id="congviecid" placeholder="ID công việc" /><br />
+  <input id="ghichu" placeholder="Ghi chú" /><br />
+  <input id="ngayphancong" placeholder="Ngày phân công (YYYY-MM-DD)" /><br />
+  <input id="trangthai" placeholder="Trạng thái" /><br />
+  <button type="submit">Phân công</button>
+</form>
+<div id="assignMsg"></div>
+{% endblock %} {% block scripts %}
+<script>
+  document.getElementById("assignForm").onsubmit = function (e) {
+    e.preventDefault();
+    fetch("/assignments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        giangvienid: document.getElementById("giangvienid").value,
+        congviecid: document.getElementById("congviecid").value,
+        ghichu: document.getElementById("ghichu").value,
+        ngayphancong: document.getElementById("ngayphancong").value,
+        trangthai: document.getElementById("trangthai").value,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById("assignMsg").innerText =
+          data.message || "Phân công thành công!";
+      });
+  };
+</script>
+{% endblock %}

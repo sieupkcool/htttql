@@ -1,0 +1,177 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f8f9fa;
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  background: #343a40;
+  color: #fff;
+  min-height: 100vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.sidebar .user-info {
+  text-align: center;
+  padding: 32px 0 16px 0;
+  border-bottom: 1px solid #495057;
+}
+
+.sidebar .user-info img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.sidebar .user-info h5 {
+  margin: 12px 0 4px 0;
+  font-size: 18px;
+}
+
+.sidebar .status {
+  font-size: 13px;
+  color: #2ecc71;
+}
+
+.sidebar a {
+  color: #fff;
+  text-decoration: none;
+  padding: 14px 32px;
+  display: block;
+  transition: background 0.2s, color 0.2s;
+  font-size: 16px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: #495057;
+  color: #ffc107;
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 40px 30px;
+  min-height: 100vh;
+  background: #fff;
+  border-radius: 0 0 0 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex: 1;
+}
+
+h2,
+h1 {
+  color: #2c3e50;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+th,
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e1e1e1;
+  text-align: left;
+}
+
+th {
+  background: #f1f1f1;
+  color: #333;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+button,
+.btn {
+  background: #3498db;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  margin: 4px 0;
+  transition: background 0.2s;
+}
+
+button:hover,
+.btn:hover {
+  background: #217dbb;
+}
+
+input,
+select,
+textarea {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 8px 0;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+form {
+  max-width: 400px;
+  margin-bottom: 24px;
+}
+
+.de-thi-card {
+  background: #3498db;
+  color: #fff;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.08);
+}
+
+.de-thi-card button {
+  margin-top: 10px;
+  background: #fff;
+  color: #3498db;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 8px 16px;
+  font-weight: bold;
+}
+
+.de-thi-card button:hover {
+  background: #eaf6fb;
+}
+
+.list-group-item {
+  background: #f8f9fa;
+  border: 1px solid #e1e1e1;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  padding: 10px 16px;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 20px 10px;
+  }
+}

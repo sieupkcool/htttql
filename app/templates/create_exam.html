@@ -1,0 +1,35 @@
+{% extends "base.html" %} {% block title %}Tạo đề thi{% endblock %} {% block
+content %}
+<h2>Tạo đề thi mới</h2>
+<form id="createExamForm">
+  <input id="madethi" placeholder="Mã đề thi" required /><br />
+  <input id="ghichu" placeholder="Ghi chú" /><br />
+  <input id="monhocid" placeholder="ID môn học" required /><br />
+  <input id="ngaytao" placeholder="Ngày tạo (YYYY-MM-DD)" required /><br />
+  <input id="cautrucdethiid" placeholder="ID cấu trúc đề thi" /><br />
+  <button type="submit">Tạo đề thi</button>
+</form>
+<div id="examMsg"></div>
+{% endblock %} {% block scripts %}
+<script>
+  document.getElementById("createExamForm").onsubmit = function (e) {
+    e.preventDefault();
+    fetch("/exams", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        madethi: document.getElementById("madethi").value,
+        ghichu: document.getElementById("ghichu").value,
+        monhocid: document.getElementById("monhocid").value,
+        ngaytao: document.getElementById("ngaytao").value,
+        cautrucdethiid: document.getElementById("cautrucdethiid").value,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById("examMsg").innerText =
+          data.message || "Tạo đề thi thành công!";
+      });
+  };
+</script>
+{% endblock %}

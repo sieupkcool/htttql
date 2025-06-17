@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% block title %}Thống kê câu hỏi{% endblock %} {%
+block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %} {% block content %}
+<h2>Thống kê câu hỏi theo môn</h2>
+<canvas id="chart" width="600" height="400"></canvas>
+{% endblock %} {% block scripts %}
+<script>
+  fetch("/statistics/question")
+    .then((res) => res.json())
+    .then((data) => {
+      const labels = Object.keys(data);
+      const easy = labels.map((l) => data[l].Dễ || 0);
+      const hard = labels.map((l) => data[l].Khó || 0);
+      new Chart(document.getElementById("chart"), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "Dễ", data: easy, backgroundColor: "green" },
+            { label: "Khó", data: hard, backgroundColor: "red" },
+          ],
+        },
+      });
+    });
+</script>
+{% endblock %}

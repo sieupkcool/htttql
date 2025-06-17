@@ -1,0 +1,47 @@
+<div class="sidebar">
+  <div class="user-info">
+    <img
+      src="https://i.pinimg.com/736x/8f/1c/a2/8f1ca2029e2efceebd22fa05cca423d7.jpg"
+      class="rounded-circle"
+      alt="Avatar"
+    />
+    <h5 id="sidebar-username">AdminTeam</h5>
+    <div class="status">● Online</div>
+  </div>
+  <a href="/index">🏠 Trang chủ</a>
+  <a href="/profile">👤 Thông tin cá nhân</a>
+  <a href="/statistics" class="role-all">📊 Thống kê</a>
+  <a href="/bomon" class="role-truongkhoa">📚 Bộ môn</a>
+  <a href="/assignment" class="role-truongbomon">🤝 Phân công</a>
+  <a href="/progress" class="role-truongbomon">✅ Duyệt công việc</a>
+  <a href="/create_exam" class="role-truongbomon">📝 Tạo đề thi</a>
+  <a href="/exam_list" class="role-truongbomon">📋 Quản lý đề thi</a>
+  <a href="/question_list" class="role-truongbomon">❓ Quản lý câu hỏi</a>
+  <a href="/add_question" class="role-giangvien">➕ Thêm câu hỏi</a>
+  <a href="/completion_stats" class="role-truongbomon role-truongkhoa"
+    >📈 Tỷ lệ hoàn thành</a
+  >
+  <a href="/users" class="role-truongkhoa">👥 Quản lý giảng viên</a>
+  <a href="/login" id="logout-link">🚪 Đăng xuất</a>
+</div>
+<script>
+  // Ẩn/hiện menu theo role
+  const role = localStorage.getItem("role");
+  document.querySelectorAll(".sidebar a").forEach((a) => {
+    if (
+      (a.classList.contains("role-truongkhoa") && role !== "Trưởng khoa") ||
+      (a.classList.contains("role-truongbomon") && role !== "Trưởng bộ môn") ||
+      (a.classList.contains("role-giangvien") && role !== "Giảng viên")
+    ) {
+      a.style.display = "none";
+    }
+  });
+  // Đăng xuất
+  document.getElementById("logout-link").onclick = function () {
+    localStorage.clear();
+  };
+  // Hiển thị tên user nếu có
+  const username = localStorage.getItem("username");
+  if (username)
+    document.getElementById("sidebar-username").innerText = username;
+</script>
