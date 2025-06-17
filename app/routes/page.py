@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session, redirect, url_for
 
 page_bp = Blueprint('page', __name__)
 
@@ -65,3 +65,8 @@ def chitietde():
 @page_bp.route('/chitietdethi')
 def chitietdethi():
     return render_template('chitietdethi.html')
+
+@page_bp.route('/assigned_tasks')
+def assigned_tasks():
+    # Nếu muốn kiểm tra quyền, có thể kiểm tra session['role'] == 'Giảng viên'
+    return render_template('assigned_tasks.html')

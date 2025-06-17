@@ -37,3 +37,10 @@ def delete_assignment(assignment_id):
         return jsonify({'message': 'Assignment deleted successfully'}), 204
     except Exception as e:
         return jsonify({'error': str(e)}), 404
+
+@assignment_bp.route('/assignments')
+def get_assignments():
+    giangvienid = request.args.get('giangvienid')
+    # Lấy danh sách phân công cho giảng viên này
+    assignments = AssignmentService.get_assignments_for_giangvien(giangvienid)
+    return jsonify(assignments)

@@ -18,7 +18,10 @@
   <a href="/create_exam" class="role-truongbomon">📝 Tạo đề thi</a>
   <a href="/exam_list" class="role-truongbomon">📋 Quản lý đề thi</a>
   <a href="/question_list" class="role-truongbomon">❓ Quản lý câu hỏi</a>
-  <a href="/add_question" class="role-giangvien">➕ Thêm câu hỏi</a>
+
+  <a href="/assigned_tasks" class="role-giangvien"
+    >📝 Công việc được phân công</a
+  >
   <a href="/completion_stats" class="role-truongbomon role-truongkhoa"
     >📈 Tỷ lệ hoàn thành</a
   >
@@ -27,7 +30,7 @@
 </div>
 <script>
   const role = localStorage.getItem("role");
-  const hovaten = localStorage.getItem("hovaten"); // Sửa lại dòng này
+  const hovaten = localStorage.getItem("hovaten");
 
   // Ẩn/hiện menu theo role
   document.querySelectorAll(".sidebar a").forEach((a) => {
@@ -46,8 +49,7 @@
   };
 
   // Hiển thị họ tên nếu có
-  if (hovaten)
-    document.getElementById("sidebar-username").innerText = hovaten;
+  if (hovaten) document.getElementById("sidebar-username").innerText = hovaten;
   // Hiển thị vai trò
   if (role) document.getElementById("sidebar-role").innerText = role;
 </script>

@@ -1,0 +1,364 @@
+{% extends "base.html" %} {% block title %}Công việc được phân công{% endblock
+%} {% block content %}
+<h2>Công việc được phân công</h2>
+<table id="taskTable" class="table">
+  <thead>
+    <tr>
+      <th>Công việc</th>
+      <th>Số lượng câu hỏi giao</th>
+      <th>Số lượng đã thêm</th>
+      <th>Trạng thái</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<div id="questionList"></div>
+{% endblock %} {% block scripts %}
+<script>
+  const userId = localStorage.getItem("user_id");
+
+  // Lấy danh sách công việc được phân công cho giảng viên
+  function loadTasks() {
+    fetch(`/assignments?giangvienid=${userId}`)
+      .then((res) => res.json())
+      .then((tasks) => {
+        const tbody = document
+          .getElementById("taskTable")
+          .querySelector("tbody");
+        tbody.innerHTML = "";
+        tasks.forEach((task) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+          <td>${task.congviecid}</td>
+          <td>${task.soluongcauhoi}</td>
+          <td>${task.soluongdatham || 0}</td>
+          <td>${task.trangthai}</td>
+          <td><button onclick="viewQuestions(${task.phancongid}, ${
+            task.soluongcauhoi
+          })">Xem chi tiết</button></td>
+        `;
+          tbody.appendChild(tr);
+        });
+      });
+  }
+
+  // Xem chi tiết câu hỏi của công việc
+  function viewQuestions(phancongid, maxQuestions) {
+    fetch(`/questions?phancongid=${phancongid}`)
+      .then((res) => res.json())
+      .then((questions) => {
+        let html = `<h3>Danh sách câu hỏi (${questions.length}/${maxQuestions})</h3>
+      <table class="table"><thead>
+      <tr><th>ID</th><th>Nội dung</th><th>Thao tác</th></tr></thead><tbody>`;
+        questions.forEach((q) => {
+          html += `<tr>
+          <td>${q.cauhoiid}</td>
+          <td>${q.mota}</td>
+          <td>
+            <button onclick="editQuestion(${q.cauhoiid}, ${phancongid}, ${maxQuestions})">Sửa</button>
+            <button onclick="deleteQuestion(${q.cauhoiid}, ${phancongid}, ${maxQuestions})">Xóa</button>
+          </td>
+        </tr>`;
+        });
+        html += `</tbody></table>
+      <button onclick="showAddForm(${phancongid}, ${maxQuestions}, ${questions.length})">Thêm câu hỏi</button>
+      <button onclick="submitTask(${phancongid})">Nộp công việc</button>
+      <div id="addForm"></div>
+      <div id="editForm"></div>
+      <div id="taskMsg"></div>
+      `;
+        document.getElementById("questionList").innerHTML = html;
+      });
+  }
+
+  // Thêm câu hỏi (giới hạn số lượng)
+  function showAddForm(phancongid, maxQuestions, currentCount) {
+    if (currentCount >= maxQuestions) {
+      document.getElementById("taskMsg").innerText =
+        "Không thể thêm quá số lượng câu hỏi được giao!";
+      return;
+    }
+    document.getElementById("addForm").innerHTML = `
+    <form id="addDetailQuestionForm">
+      <div><label>Nội dung:</label>
+        <input id="addMota" required /></div>
+      <div><label>Mức độ:</label>
+        <select id="addMucdo" required>
+          <option value="">Chọn mức độ</option>
+          <option value="Dễ">Dễ</option>
+          <option value="Trung bình">Trung bình</option>
+          <option value="Khó">Khó</option>
+        </select></div>
+      <div><label>Chương:</label>
+        <input id="addChuong" type="number" min="1" required /></div>
+      <div><label>Loại câu hỏi:</label>
+        <select id="addLoai" required>
+          <option value="tracnghiem">Trắc nghiệm</option>
+          <option value="tuluan">Tự luận</option>
+        </select></div>
+      <div id="addDapAnInputs"></div>
+      <button type="submit">Lưu</button>
+      <button type="button" onclick="document.getElementById('addForm').innerHTML=''">Hủy</button>
+      <div id="addQuestionMsg" class="text-danger mt-2"></div>
+    </form>
+  `;
+    renderAddDapAnInputs();
+
+    document.getElementById("addLoai").onchange = renderAddDapAnInputs;
+
+    function renderAddDapAnInputs() {
+      const type = document.getElementById("addLoai").value;
+      const div = document.getElementById("addDapAnInputs");
+      div.innerHTML = "";
+      if (type === "tracnghiem") {
+        const labels = ["A", "B", "C", "D"];
+        for (let i = 0; i < 4; i++) {
+          div.innerHTML += `
+          <div>
+            <label>Đáp án ${labels[i]}:</label>
+            <input id="addDapan${labels[i]}" required />
+            <input type="radio" name="addDapanDung" value="${labels[i]}" ${i === 0 ? "checked" : ""}/> Đúng
+          </div>
+        `;
+        }
+      } else {
+        div.innerHTML = `
+        <label>Đáp án tự luận:</label>
+        <textarea id="addTuluanContent" required></textarea>
+      `;
+      }
+    }
+
+    document.getElementById("addDetailQuestionForm").onsubmit = function(e) {
+      e.preventDefault();
+      const mota = document.getElementById("addMota").value.trim();
+      const mucdo = document.getElementById("addMucdo").value;
+      const chuong = document.getElementById("addChuong").value;
+      const loaicauhoi = document.getElementById("addLoai").value;
+      let dapan = null;
+
+      if (!mota) {
+        document.getElementById("addQuestionMsg").innerText = "Vui lòng nhập nội dung câu hỏi";
+        return;
+      }
+      if (!mucdo) {
+        document.getElementById("addQuestionMsg").innerText = "Vui lòng chọn mức độ";
+        return;
+      }
+      if (!chuong) {
+        document.getElementById("addQuestionMsg").innerText = "Vui lòng nhập chương";
+        return;
+      }
+
+      if (loaicauhoi === "tracnghiem") {
+        const labels = ["A", "B", "C", "D"];
+        const choices = [];
+        for (let i = 0; i < 4; i++) {
+          const val = document.getElementById(`addDapan${labels[i]}`).value.trim();
+          if (!val) {
+            document.getElementById("addQuestionMsg").innerText = `Vui lòng nhập đáp án ${labels[i]}`;
+            return;
+          }
+          choices.push(val);
+        }
+        const correct = document.querySelector('input[name="addDapanDung"]:checked');
+        if (!correct) {
+          document.getElementById("addQuestionMsg").innerText = "Vui lòng chọn đáp án đúng";
+          return;
+        }
+        dapan = JSON.stringify({
+          option: correct.value,
+          choices: choices
+        });
+      } else {
+        const content = document.getElementById("addTuluanContent").value.trim();
+        if (!content) {
+          document.getElementById("addQuestionMsg").innerText = "Vui lòng nhập đáp án tự luận";
+          return;
+        }
+        dapan = JSON.stringify({ content });
+      }
+
+      // Lấy user_id từ localStorage, ngày tạo hiện tại
+      const nguoitaoid = localStorage.getItem("user_id");
+      const ngaytao = new Date().toISOString().slice(0, 10);
+
+      fetch("/questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          nguoitaoid: nguoitaoid
+        },
+        body: JSON.stringify({
+          mota,
+          mucdo,
+          chuong,
+          loaicauhoi,
+          dapan,
+          ngaytao,
+          noidung: mota,
+          phancongid
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.message && data.message.includes("thành công")) {
+            document.getElementById("addForm").innerHTML = "";
+            viewQuestions(phancongid, maxQuestions);
+            loadTasks();
+          } else {
+            document.getElementById("addQuestionMsg").innerText = data.message || "Có lỗi xảy ra!";
+          }
+        });
+    };
+  }
+  // Sửa câu hỏi
+  function editQuestion(cauhoiid, phancongid, maxQuestions) {
+    // Lấy chi tiết câu hỏi từ backend
+    fetch(`/questions/${cauhoiid}`)
+      .then((res) => res.json())
+      .then((q) => {
+        let html = `
+        <form id="editQuestionForm">
+          <div><label>Nội dung:</label>
+            <input id="editContent" value="${q.mota || ""}" /></div>
+          <div><label>Mức độ:</label>
+            <select id="editMucdo">
+              <option value="Dễ" ${q.mucdo === "Dễ" ? "selected" : ""}>Dễ</option>
+              <option value="Trung bình" ${q.mucdo === "Trung bình" ? "selected" : ""}>Trung bình</option>
+              <option value="Khó" ${q.mucdo === "Khó" ? "selected" : ""}>Khó</option>
+            </select></div>
+          <div><label>Chương:</label>
+            <input id="editChuong" type="number" value="${q.chuong || ""}" /></div>
+          <div><label>Loại câu hỏi:</label>
+            <select id="editLoai">
+              <option value="tracnghiem" ${q.loaicauhoi === "tracnghiem" ? "selected" : ""}>Trắc nghiệm</option>
+              <option value="tuluan" ${q.loaicauhoi === "tuluan" ? "selected" : ""}>Tự luận</option>
+            </select></div>
+          <div id="editDapAnInputs"></div>
+          <button type="submit">Lưu</button>
+        </form>
+      `;
+        document.getElementById("editForm").innerHTML = html;
+
+        // Hiển thị đáp án
+        renderEditDapAnInputs(q);
+
+        // Đổi loại câu hỏi sẽ render lại đáp án
+        document.getElementById("editLoai").onchange = function () {
+          renderEditDapAnInputs(q);
+        };
+
+        document.getElementById("editQuestionForm").onsubmit = function (e) {
+          e.preventDefault();
+          const mota = document.getElementById("editContent").value;
+          const mucdo = document.getElementById("editMucdo").value;
+          const chuong = document.getElementById("editChuong").value;
+          const loaicauhoi = document.getElementById("editLoai").value;
+          let dapan = null;
+
+          if (loaicauhoi === "tracnghiem") {
+            const labels = ["A", "B", "C", "D"];
+            const choices = [];
+            for (let i = 0; i < 4; i++) {
+              const val = document
+                .getElementById(`editDapan${labels[i]}`)
+                .value.trim();
+              if (!val) {
+                alert(`Vui lòng nhập đáp án ${labels[i]}`);
+                return;
+              }
+              choices.push(val);
+            }
+            const correct = document.querySelector('input[name="editDapanDung"]:checked');
+            if (!correct) {
+              alert("Vui lòng chọn đáp án đúng");
+              return;
+            }
+            dapan = JSON.stringify({
+              option: correct.value,
+              choices: choices,
+            });
+          } else {
+            const content = document.getElementById("editTuluanContent").value.trim();
+            if (!content) {
+              alert("Vui lòng nhập đáp án tự luận");
+              return;
+            }
+            dapan = JSON.stringify({ content });
+          }
+
+          fetch(`/questions/${cauhoiid}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mota,
+              mucdo,
+              chuong,
+              loaicauhoi,
+              dapan,
+            }),
+          }).then(() => {
+            document.getElementById("editForm").innerHTML = "";
+            viewQuestions(phancongid, maxQuestions);
+          });
+        };
+      });
+  }
+
+  // Hàm hiển thị đáp án cho form sửa
+  function renderEditDapAnInputs(q) {
+    const type = document.getElementById("editLoai").value;
+    const div = document.getElementById("editDapAnInputs");
+    div.innerHTML = "";
+    if (type === "tracnghiem") {
+      let dapanObj = { option: "A", choices: ["", "", "", ""] };
+      try {
+        dapanObj = JSON.parse(q.dapan || "{}");
+      } catch {}
+      const labels = ["A", "B", "C", "D"];
+      for (let i = 0; i < 4; i++) {
+        div.innerHTML += `
+        <div>
+          <label>Đáp án ${labels[i]}:</label>
+          <input id="editDapan${labels[i]}" value="${dapanObj.choices && dapanObj.choices[i] ? dapanObj.choices[i] : ""}" />
+          <input type="radio" name="editDapanDung" value="${labels[i]}" ${dapanObj.option === labels[i] ? "checked" : ""}/> Đúng
+        </div>
+      `;
+      }
+    } else {
+      let content = "";
+      try {
+        content = JSON.parse(q.dapan || "{}").content || "";
+      } catch {}
+      div.innerHTML = `
+      <label>Đáp án tự luận:</label>
+      <textarea id="editTuluanContent">${content}</textarea>
+    `;
+    }
+  }
+
+  // Xóa câu hỏi
+  function deleteQuestion(cauhoiid, phancongid, maxQuestions) {
+    fetch(`/questions/${cauhoiid}`, { method: "DELETE" }).then(() => {
+      viewQuestions(phancongid, maxQuestions);
+      loadTasks();
+    });
+  }
+
+  // Nộp công việc
+  function submitTask(phancongid) {
+    fetch(`/assignments/${phancongid}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ trangthai: "Chờ duyệt" }),
+    }).then(() => {
+      loadTasks();
+      document.getElementById("questionList").innerHTML = "";
+    });
+  }
+
+  loadTasks();
+</script>
+{% endblock %}

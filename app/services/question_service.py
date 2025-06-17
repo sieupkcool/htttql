@@ -30,8 +30,9 @@ class QuestionService:
             dapan=data.get('dapan'),
             nguoitaoid=data.get('nguoitaoid'),
             ngaytao=data.get('ngaytao'),
-            noidung=noidung,  # Thêm dòng này
-            dethiid=data.get('dethiid')
+            noidung=data.get('noidung') or data.get('mota'),
+            dethiid=data.get('dethiid'),
+            phancongid=data.get('phancongid')
         )
         db.session.add(new_question)
         db.session.commit()
@@ -42,22 +43,21 @@ class QuestionService:
         question = cauhoi.query.get(question_id)
         if not question:
             return jsonify({"message": "Question not found"}), 404
-        
         question.mota = data.get('mota', question.mota)
         question.mucdo = data.get('mucdo', question.mucdo)
         question.chuong = data.get('chuong', question.chuong)
-        question.nguoitaoid = data.get('nguoitaoid', question.nguoitaoid)
-        question.dethiid = data.get('dethiid', question.dethiid)
-        
+        question.loaicauhoi = data.get('loaicauhoi', question.loaicauhoi)
+        question.dapan = data.get('dapan', question.dapan)
         db.session.commit()
-        return jsonify({"message": "Question updated successfully"}), 200
+        return jsonify({"message": "Cập nhật thành công"})
 
     @staticmethod
     def delete_question(question_id):
         question = cauhoi.query.get(question_id)
         if not question:
             return jsonify({"message": "Question not found"}), 404
-        
+        if question.trangthai == "Đã duyệt":
+            return jsonify({"message": "Không thể xóa câu hỏi đã được duyệt"}), 400
         db.session.delete(question)
         db.session.commit()
         return jsonify({"message": "Question deleted successfully"}), 200
@@ -78,12 +78,23 @@ class QuestionService:
     def get_question_by_id(question_id):
         question =  cauhoi.query.get(question_id)
         if not question:
-            return jsonify({"message": "Question not found"}), 404
-        return jsonify({
+            return {"message": "Question not found"}, 404
+        return {
             "cauhoiid": question.cauhoiid,
             "mota": question.mota,
             "mucdo": question.mucdo,
             "chuong": question.chuong,
             "nguoitaoid": question.nguoitaoid,
-            "dethiid": question.dethiid
-        }), 200
+            "dethiid": question.dethiid,
+            "loaicauhoi": question.loaicauhoi,
+            "dapan": question.dapan
+        }, 200
+    
+    @staticmethod
+    def get_questions_by_assignment(phancongid):
+        questions = cauhoi.query.filter_by(phancongid=phancongid).all()
+        return [{
+            "cauhoiid": q.cauhoiid,
+            "mota": q.mota,
+            # ...các trường khác nếu cần...
+        } for q in questions]
