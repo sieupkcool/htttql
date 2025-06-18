@@ -6,9 +6,10 @@ exam_service = ExamService()
 
 @exam_bp.route('/exams', methods=['POST'])
 def create_exam():
-    data = request.json
-    exam = exam_service.create_exam(data)
-    return jsonify(exam), 201
+    data = request.get_json()
+    print(data)  # Kiểm tra dữ liệu nhận được
+    result = ExamService.create_exam(data)
+    return jsonify(result), 201 if result.get("message") == "Exam created successfully" else 400
 
 @exam_bp.route('/exams/<int:exam_id>', methods=['PUT'])
 def update_exam(exam_id):
