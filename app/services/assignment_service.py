@@ -60,19 +60,40 @@ class AssignmentService:
 
     @staticmethod
     def get_assignments_for_giangvien(giangvienid):
-        assignments = chitietcongviec.query.filter_by(giangvienid=giangvienid).all()
+        if giangvienid:
+            assignments = chitietcongviec.query.filter_by(giangvienid=giangvienid).all()
+        else:
+            assignments = chitietcongviec.query.all()
         result = []
         for a in assignments:
-            # Lấy số lượng câu hỏi từ bảng congviec
             congviec_obj = congviec.query.get(a.congviecid)
             soluongcauhoi = congviec_obj.soluongcauhoi if congviec_obj else 0
-            # Đếm số câu hỏi đã thêm cho công việc này
+            noidung = congviec_obj.noidung if congviec_obj else None
             so_cau = cauhoi.query.filter_by(phancongid=a.phancongid).count()
             result.append({
                 "phancongid": a.phancongid,
+                "giangvienid": a.giangvienid,
                 "congviecid": a.congviecid,
+                "noidung": noidung,
                 "soluongcauhoi": soluongcauhoi,
                 "soluongdatham": so_cau,
                 "trangthai": a.trangthai
             })
         return result
+
+    def create_task(self, data):
+        task = congviec(
+            noidung=data.get('noidung'),
+            soluongcauhoi=int(data.get('soluongcauhoi')) if data.get('soluongcauhoi') else None,
+            truongbomonid=int(data.get('truongbomonid')) if data.get('truongbomonid') else None,
+            monhocid=int(data.get('monhocid')) if data.get('monhocid') else None
+        )
+        db.session.add(task)
+        db.session.commit()
+        return {
+            "congviecid": task.congviecid,
+            "noidung": task.noidung,
+            "soluongcauhoi": task.soluongcauhoi,
+            "truongbomonid": task.truongbomonid,
+            "monhocid": task.monhocid
+        }

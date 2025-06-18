@@ -1,5 +1,15 @@
 {% extends "base.html" %} {% block title %}Phân công công việc{% endblock %} {%
 block content %}
+<h2>Tạo công việc mới</h2>
+<form id="taskForm">
+  <input id="noidung" placeholder="Nội dung" /><br />
+  <input id="soluongcauhoi" type="number" placeholder="Số lượng câu hỏi" /><br />
+  <input id="truongbomonid" placeholder="ID trưởng bộ môn" /><br />
+  <input id="monhocid" placeholder="ID môn học" /><br />
+  <button type="submit">Tạo công việc</button>
+</form>
+<div id="taskMsg"></div>
+<hr />
 <h2>Phân công công việc cho giảng viên</h2>
 <form id="assignForm">
   <input id="giangvienid" placeholder="ID giảng viên" /><br />
@@ -11,6 +21,26 @@ block content %}
 </form>
 <div id="assignMsg"></div>
 {% endblock %} {% block scripts %}
+<script>
+  document.getElementById("taskForm").onsubmit = function (e) {
+    e.preventDefault();
+    fetch("/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        noidung: document.getElementById("noidung").value,
+        soluongcauhoi: document.getElementById("soluongcauhoi").value,
+        truongbomonid: document.getElementById("truongbomonid").value,
+        monhocid: document.getElementById("monhocid").value,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById("taskMsg").innerText =
+          data.message || "Tạo công việc thành công!";
+      });
+  };
+</script>
 <script>
   document.getElementById("assignForm").onsubmit = function (e) {
     e.preventDefault();

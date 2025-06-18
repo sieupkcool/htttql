@@ -53,3 +53,12 @@ def get_jobs():
         {"congviecid": j.congviecid, "noidung": j.noidung}
         for j in jobs
     ])
+
+@assignment_bp.route('/tasks', methods=['POST'])
+def create_task():
+    data = request.json
+    try:
+        task = assignment_service.create_task(data)
+        return jsonify(task), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
