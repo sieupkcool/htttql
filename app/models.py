@@ -74,7 +74,7 @@ class kyhocmonhoc(db.Model):
 
 class congviec(db.Model):
     __tablename__ = 'congviec'
-    congviecid = db.Column(db.Integer, primary_key=True)
+    congviecid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     noidung = db.Column(db.String(255))
     soluongcauhoi = db.Column(db.Integer)
     truongbomonid = db.Column(db.Integer, db.ForeignKey('truongbomon.truongbomonid'))
@@ -82,7 +82,7 @@ class congviec(db.Model):
 
 class chitietcongviec(db.Model):
     __tablename__ = 'chitietcongviec'
-    phancongid = db.Column(db.Integer, primary_key=True)
+    phancongid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     giangvienid = db.Column(db.Integer, db.ForeignKey('giangvien.giangvienid'))
     congviecid = db.Column(db.Integer, db.ForeignKey('congviec.congviecid'))
     ghichu = db.Column(db.String(255))

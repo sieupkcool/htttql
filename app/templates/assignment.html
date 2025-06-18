@@ -16,7 +16,8 @@ block content %}
   <input id="congviecid" placeholder="ID công việc" /><br />
   <input id="ghichu" placeholder="Ghi chú" /><br />
   <input id="ngayphancong" placeholder="Ngày phân công (YYYY-MM-DD)" /><br />
-  <input id="trangthai" placeholder="Trạng thái" /><br />
+  <input id="ngayketthuc" placeholder="Ngày kết thúc (YYYY-MM-DD)" /><br />
+  <input id="trangthai" value="Chưa làm" readonly style="background:#e9ecef;" /><br />
   <button type="submit">Phân công</button>
 </form>
 <div id="assignMsg"></div>
@@ -24,6 +25,13 @@ block content %}
 <script>
   document.getElementById("taskForm").onsubmit = function (e) {
     e.preventDefault();
+    const soluongcauhoi = document.getElementById("soluongcauhoi").value;
+    const truongbomonid = document.getElementById("truongbomonid").value;
+    const monhocid = document.getElementById("monhocid").value;
+    if (!soluongcauhoi || !truongbomonid || !monhocid) {
+      alert("Vui lòng nhập đầy đủ và đúng các trường số!");
+      return;
+    }
     fetch("/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,6 +52,17 @@ block content %}
 <script>
   document.getElementById("assignForm").onsubmit = function (e) {
     e.preventDefault();
+    let ngayphancong = document.getElementById("ngayphancong").value;
+    let ngayketthuc = document.getElementById("ngayketthuc").value;
+    // Chuyển đổi DD-MM-YYYY sang YYYY-MM-DD nếu cần
+    if (/^\d{2}-\d{2}-\d{4}$/.test(ngayphancong)) {
+      const [d, m, y] = ngayphancong.split("-");
+      ngayphancong = `${y}-${m}-${d}`;
+    }
+    if (/^\d{2}-\d{2}-\d{4}$/.test(ngayketthuc)) {
+      const [d, m, y] = ngayketthuc.split("-");
+      ngayketthuc = `${y}-${m}-${d}`;
+    }
     fetch("/assignments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -51,7 +70,8 @@ block content %}
         giangvienid: document.getElementById("giangvienid").value,
         congviecid: document.getElementById("congviecid").value,
         ghichu: document.getElementById("ghichu").value,
-        ngayphancong: document.getElementById("ngayphancong").value,
+        ngayphancong: ngayphancong,
+        ngayketthuc: ngayketthuc,
         trangthai: document.getElementById("trangthai").value,
       }),
     })
