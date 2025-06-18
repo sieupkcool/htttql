@@ -63,7 +63,7 @@
         });
         html += `</tbody></table>
       <button onclick="showAddForm(${phancongid}, ${maxQuestions}, ${questions.length})">Thêm câu hỏi</button>
-      <button onclick="submitTask(${phancongid})">Nộp công việc</button>
+      <button onclick="submitTask(${phancongid}, ${maxQuestions})">Nộp công việc</button>
       <div id="addForm"></div>
       <div id="editForm"></div>
       <div id="taskMsg"></div>
@@ -118,7 +118,9 @@
           <div>
             <label>Đáp án ${labels[i]}:</label>
             <input id="addDapan${labels[i]}" required />
-            <input type="radio" name="addDapanDung" value="${labels[i]}" ${i === 0 ? "checked" : ""}/> Đúng
+            <input type="radio" name="addDapanDung" value="${labels[i]}" ${
+            i === 0 ? "checked" : ""
+          }/> Đúng
           </div>
         `;
         }
@@ -130,7 +132,7 @@
       }
     }
 
-    document.getElementById("addDetailQuestionForm").onsubmit = function(e) {
+    document.getElementById("addDetailQuestionForm").onsubmit = function (e) {
       e.preventDefault();
       const mota = document.getElementById("addMota").value.trim();
       const mucdo = document.getElementById("addMucdo").value;
@@ -139,15 +141,18 @@
       let dapan = null;
 
       if (!mota) {
-        document.getElementById("addQuestionMsg").innerText = "Vui lòng nhập nội dung câu hỏi";
+        document.getElementById("addQuestionMsg").innerText =
+          "Vui lòng nhập nội dung câu hỏi";
         return;
       }
       if (!mucdo) {
-        document.getElementById("addQuestionMsg").innerText = "Vui lòng chọn mức độ";
+        document.getElementById("addQuestionMsg").innerText =
+          "Vui lòng chọn mức độ";
         return;
       }
       if (!chuong) {
-        document.getElementById("addQuestionMsg").innerText = "Vui lòng nhập chương";
+        document.getElementById("addQuestionMsg").innerText =
+          "Vui lòng nhập chương";
         return;
       }
 
@@ -155,26 +160,36 @@
         const labels = ["A", "B", "C", "D"];
         const choices = [];
         for (let i = 0; i < 4; i++) {
-          const val = document.getElementById(`addDapan${labels[i]}`).value.trim();
+          const val = document
+            .getElementById(`addDapan${labels[i]}`)
+            .value.trim();
           if (!val) {
-            document.getElementById("addQuestionMsg").innerText = `Vui lòng nhập đáp án ${labels[i]}`;
+            document.getElementById(
+              "addQuestionMsg"
+            ).innerText = `Vui lòng nhập đáp án ${labels[i]}`;
             return;
           }
           choices.push(val);
         }
-        const correct = document.querySelector('input[name="addDapanDung"]:checked');
+        const correct = document.querySelector(
+          'input[name="addDapanDung"]:checked'
+        );
         if (!correct) {
-          document.getElementById("addQuestionMsg").innerText = "Vui lòng chọn đáp án đúng";
+          document.getElementById("addQuestionMsg").innerText =
+            "Vui lòng chọn đáp án đúng";
           return;
         }
         dapan = JSON.stringify({
           option: correct.value,
-          choices: choices
+          choices: choices,
         });
       } else {
-        const content = document.getElementById("addTuluanContent").value.trim();
+        const content = document
+          .getElementById("addTuluanContent")
+          .value.trim();
         if (!content) {
-          document.getElementById("addQuestionMsg").innerText = "Vui lòng nhập đáp án tự luận";
+          document.getElementById("addQuestionMsg").innerText =
+            "Vui lòng nhập đáp án tự luận";
           return;
         }
         dapan = JSON.stringify({ content });
@@ -188,7 +203,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          nguoitaoid: nguoitaoid
+          nguoitaoid: nguoitaoid,
         },
         body: JSON.stringify({
           mota,
@@ -198,7 +213,7 @@
           dapan,
           ngaytao,
           noidung: mota,
-          phancongid
+          phancongid,
         }),
       })
         .then((res) => res.json())
@@ -208,7 +223,8 @@
             viewQuestions(phancongid, maxQuestions);
             loadTasks();
           } else {
-            document.getElementById("addQuestionMsg").innerText = data.message || "Có lỗi xảy ra!";
+            document.getElementById("addQuestionMsg").innerText =
+              data.message || "Có lỗi xảy ra!";
           }
         });
     };
@@ -225,16 +241,28 @@
             <input id="editContent" value="${q.mota || ""}" /></div>
           <div><label>Mức độ:</label>
             <select id="editMucdo">
-              <option value="Dễ" ${q.mucdo === "Dễ" ? "selected" : ""}>Dễ</option>
-              <option value="Trung bình" ${q.mucdo === "Trung bình" ? "selected" : ""}>Trung bình</option>
-              <option value="Khó" ${q.mucdo === "Khó" ? "selected" : ""}>Khó</option>
+              <option value="Dễ" ${
+                q.mucdo === "Dễ" ? "selected" : ""
+              }>Dễ</option>
+              <option value="Trung bình" ${
+                q.mucdo === "Trung bình" ? "selected" : ""
+              }>Trung bình</option>
+              <option value="Khó" ${
+                q.mucdo === "Khó" ? "selected" : ""
+              }>Khó</option>
             </select></div>
           <div><label>Chương:</label>
-            <input id="editChuong" type="number" value="${q.chuong || ""}" /></div>
+            <input id="editChuong" type="number" value="${
+              q.chuong || ""
+            }" /></div>
           <div><label>Loại câu hỏi:</label>
             <select id="editLoai">
-              <option value="tracnghiem" ${q.loaicauhoi === "tracnghiem" ? "selected" : ""}>Trắc nghiệm</option>
-              <option value="tuluan" ${q.loaicauhoi === "tuluan" ? "selected" : ""}>Tự luận</option>
+              <option value="tracnghiem" ${
+                q.loaicauhoi === "tracnghiem" ? "selected" : ""
+              }>Trắc nghiệm</option>
+              <option value="tuluan" ${
+                q.loaicauhoi === "tuluan" ? "selected" : ""
+              }>Tự luận</option>
             </select></div>
           <div id="editDapAnInputs"></div>
           <button type="submit">Lưu</button>
@@ -271,7 +299,9 @@
               }
               choices.push(val);
             }
-            const correct = document.querySelector('input[name="editDapanDung"]:checked');
+            const correct = document.querySelector(
+              'input[name="editDapanDung"]:checked'
+            );
             if (!correct) {
               alert("Vui lòng chọn đáp án đúng");
               return;
@@ -281,7 +311,9 @@
               choices: choices,
             });
           } else {
-            const content = document.getElementById("editTuluanContent").value.trim();
+            const content = document
+              .getElementById("editTuluanContent")
+              .value.trim();
             if (!content) {
               alert("Vui lòng nhập đáp án tự luận");
               return;
@@ -322,8 +354,12 @@
         div.innerHTML += `
         <div>
           <label>Đáp án ${labels[i]}:</label>
-          <input id="editDapan${labels[i]}" value="${dapanObj.choices && dapanObj.choices[i] ? dapanObj.choices[i] : ""}" />
-          <input type="radio" name="editDapanDung" value="${labels[i]}" ${dapanObj.option === labels[i] ? "checked" : ""}/> Đúng
+          <input id="editDapan${labels[i]}" value="${
+          dapanObj.choices && dapanObj.choices[i] ? dapanObj.choices[i] : ""
+        }" />
+          <input type="radio" name="editDapanDung" value="${labels[i]}" ${
+          dapanObj.option === labels[i] ? "checked" : ""
+        }/> Đúng
         </div>
       `;
       }
@@ -348,15 +384,27 @@
   }
 
   // Nộp công việc
-  function submitTask(phancongid) {
-    fetch(`/assignments/${phancongid}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ trangthai: "Chờ duyệt" }),
-    }).then(() => {
-      loadTasks();
-      document.getElementById("questionList").innerHTML = "";
-    });
+  function submitTask(phancongid, maxQuestions) {
+    // Lấy số lượng câu hỏi đã thêm
+    fetch(`/questions?phancongid=${phancongid}`)
+      .then((res) => res.json())
+      .then((questions) => {
+        if (questions.length < maxQuestions) {
+          document.getElementById(
+            "taskMsg"
+          ).innerText = `Bạn phải thêm đủ ${maxQuestions} câu hỏi trước khi nộp!`;
+          return;
+        }
+        // Nếu đủ, cho phép nộp
+        fetch(`/assignments/${phancongid}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trangthai: "Chờ duyệt" }),
+        }).then(() => {
+          loadTasks();
+          document.getElementById("questionList").innerHTML = "";
+        });
+      });
   }
 
   loadTasks();
