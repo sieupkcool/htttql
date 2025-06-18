@@ -98,3 +98,15 @@ class QuestionService:
             "mota": q.mota,
             # ...các trường khác nếu cần...
         } for q in questions]
+        
+    @staticmethod
+    def get_questions_by_exam(dethiid):
+        questions = cauhoi.query.filter_by(dethiid=dethiid).all()
+        return [{
+            "cauhoiid": q.cauhoiid,
+            "mota": q.mota,
+            "mucdo": q.mucdo,
+            "chuong": q.chuong,
+            "loaicauhoi": q.loaicauhoi,
+            "dapan": q.dapan
+        } for q in questions]

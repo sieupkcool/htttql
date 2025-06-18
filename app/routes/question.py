@@ -45,3 +45,8 @@ def get_questions():
 def get_question(question_id):
     data, status = question_service.get_question_by_id(question_id)
     return jsonify(data), status
+
+@question_bp.route('/questions/by_exam/<int:dethiid>', methods=['GET'])
+def get_questions_by_exam(dethiid):
+    questions = QuestionService.get_questions_by_exam(dethiid)
+    return jsonify(questions), 200
