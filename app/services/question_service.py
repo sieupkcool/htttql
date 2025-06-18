@@ -96,6 +96,7 @@ class QuestionService:
         return [{
             "cauhoiid": q.cauhoiid,
             "mota": q.mota,
+            "noidung": q.noidung,
             # ...các trường khác nếu cần...
         } for q in questions]
         
