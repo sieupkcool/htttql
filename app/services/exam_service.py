@@ -55,14 +55,15 @@ class ExamService:
             "year": exam.year
         }), 200
 
+   
     @staticmethod
     def get_all_exams():
         exams = dethi.query.all()
-        return jsonify([{
-            "id": exam.id,
-            "title": exam.title,
-            "description": exam.description,
-            "subject_id": exam.subject_id,
-            "semester": exam.semester,
-            "year": exam.year
-        } for exam in exams]), 200
+        return [{
+            "dethiid": exam.dethiid,  # Sử dụng đúng tên thuộc tính
+            "madethi": exam.madethi,
+            "ghichu": exam.ghichu,
+            "monhocid": exam.monhocid,
+            "ngaytao": exam.ngaytao.strftime('%Y-%m-%d') if exam.ngaytao else None,
+            "cautrucdethiid": exam.cautrucdethiid
+        } for exam in exams]
