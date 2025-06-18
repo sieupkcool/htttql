@@ -12,12 +12,8 @@ block content %}
   </ul>
 </div>
 <div class="d-flex gap-3">
-  <button class="btn btn-warning px-4" onclick="suaDeThi()">a
-    🖊️ Sửa đề thi
-  </button>
-  <button class="btn btn-danger px-4" onclick="xoaDeThi()">
-    🗑️ Xóa đề thi
-  </button>
+  <button class="btn btn-warning px-4" onclick="suaDeThi()">🖊️ Sửa đề thi</button>
+  <button class="btn btn-danger px-4" onclick="xoaDeThi()">🗑️ Xóa đề thi</button>
 </div>
 {% endblock %} {% block scripts %}
 <script>
@@ -41,9 +37,37 @@ block content %}
       <p><strong>Trạng thái:</strong> ✅ Đã phê duyệt</p>
     `;
 
-    // TODO: fetch danh sách câu hỏi thực tế từ BE
-    danhSach.innerHTML =
-      "<li class='list-group-item'>Chưa có dữ liệu câu hỏi.</li>";
+    // Lấy dethiid từ madethi
+    fetch('/exams')
+      .then(res => res.json())
+      .then(exams => {
+        const exam = exams.find(e => e.madethi === deThi);
+        if (!exam) {
+          danhSach.innerHTML = "<li class='list-group-item text-danger'>Không tìm thấy đề thi.</li>";
+          return;
+        }
+        // Gọi API lấy câu hỏi theo dethiid
+        fetch(`/questions/by_exam/${exam.dethiid}`)
+          .then(res => res.json())
+          .then(questions => {
+            if (!questions.length) {
+              danhSach.innerHTML = "<li class='list-group-item'>Chưa có dữ liệu câu hỏi.</li>";
+            } else {
+              danhSach.innerHTML = questions.map(q =>
+                `<li class='list-group-item'>
+                  <b>Câu hỏi:</b> ${q.mota || '(Không có mô tả)'}<br>
+                  <b>Mức độ:</b> ${q.mucdo || ''} | <b>Chương:</b> ${q.chuong || ''}
+                </li>`
+              ).join('');
+            }
+          })
+          .catch(() => {
+            danhSach.innerHTML = "<li class='list-group-item text-danger'>Lỗi khi tải câu hỏi.</li>";
+          });
+      })
+      .catch(() => {
+        danhSach.innerHTML = "<li class='list-group-item text-danger'>Lỗi khi tải đề thi.</li>";
+      });
   } else {
     thongTin.innerHTML =
       "<p class='text-danger'>Không tìm thấy thông tin đề thi.</p>";
